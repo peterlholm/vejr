@@ -1,8 +1,13 @@
-{% extends "base.html" %}
+{% extends "base_fluid.html" %}
 {% load static %}
 
-{% block page %}
-<h1>index<h1>
+
+{% block content %}
+<div class="backgroundxx">
+
+{% include 'menu.html' %}
+
+    <h1>index<h1>
 
     <a class="btn btn-primary" href="/dmi/radar">Radar Picture</a>
     <br>
@@ -14,10 +19,8 @@
     <br>
     <a class="btn btn-primary" href="/dmi/readh5">Read H5 info</a>
 
-
-{% block content %}
-{% endblock %}
-
+</div>
+{% include 'menu_button.html' %}
 {% endblock %}
 
 {% block script %}
