@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page %}
+<h1>index<h1>
+
+    <a class="btn btn-primary" href="/dmi/radar">Radar Picture</a>
+    <br>
+    <a class="btn btn-primary" href="/dmi/convert">Convert</a>
+    <br>
+    <a class="btn btn-primary" href="/dmi/gen_all_png">Gen All Png</a>
+    <br>
+    <a class="btn btn-primary" href="/dmi/radardata">Radar Data</a>
+    <br>
+    <a class="btn btn-primary" href="/dmi/readh5">Read H5 info</a>
+
+
+{% block content %}
+{% endblock %}
+
+{% endblock %}
+
+{% block script %}
+<script>
+    $("#menu_start").addClass("active");
+</script>
+{% endblock %}

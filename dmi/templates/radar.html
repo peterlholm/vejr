@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page %}
+<style>
+    .background {
+        width: 1291px;
+        height: 672px;
+        xbackground-color: yellow;
+        background-image: url("{% static 'pic/dk.png' %}");
+        border: yellow 1px solid;
+    }
+    .radar {
+        position: relative;
+        left: 0px;
+        top: -200px;
+        z-index: 100;
+        border: red 1px solid;
+    }
+    .img {
+        border: green 1px solid;
+    }
+</style>
+
+<h2>{{ title }}</h2>
+<div>
+    <div class="background">
+        <div class="radar">
+            <img src="/data/radar/radar1.png" alt="radar" class="img" height="673" width="814">
+        </div>
+    </div>
+    <img xsrc="{% static 'pic/dk.png' %}" alt="baggrund dk" height="672" width="1291">
+</div>
+
+{% block content %}
+{% endblock %}
+
+{% endblock %}
+
+{% block script %}
+<script>
+    $("#menu_start").addClass("active");
+</script>
+{% endblock %}

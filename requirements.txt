@@ -1,0 +1,7 @@
+pylint
+requests
+django
+numpy
+pillow
+piexif
+h5py

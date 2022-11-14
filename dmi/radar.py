@@ -1,0 +1,196 @@
+"get radar images from dmi"
+#import sys
+from datetime import datetime
+from time import mktime
+from pathlib import Path
+from wsgiref.handlers import format_date_time
+from shutil import copy
+from urllib import parse
+import requests
+import h5py
+import numpy as np
+from PIL import Image, ImageOps
+from PIL.PngImagePlugin import PngInfo
+import piexif
+from django.conf import settings
+from dmi.utils import convert_img_transparent
+from .coord import radar_pic_cut
+
+#print(sys.path)
+
+RADAR_DIR = settings.DATA_DIR / 'radar'
+RADAR_API_KEY="adb8af9d-94a5-4782-9827-c2b2e775dba3"
+HTTP_TIMEOUT = 10
+
+LIMIT = "3"    # number of radar pictures
+SCAN_TYPE = "&scanType=fullRange"
+#SCAN_TYPE = ""
+RADAR_URL = "https://dmigw.govcloud.dk/v1/radardata/collections/composite/items?sortorder=datetime,DESC&limit=" + LIMIT + "&api-key=" + RADAR_API_KEY + SCAN_TYPE
+
+_DEBUG = True
+
+# class coords():
+
+dk_nw = (57.7,8.01)
+dk_se = (54.58, 12.73)
+
+def rfc3339_date(date):
+    "return rfc datestring"
+    datestr = date.astimezone().isoformat('T', 'seconds')
+    return datestr
+
+def rfc1123_date(date):
+    "generate a rfc1123 date string"
+    stamp = mktime(date.timetuple())
+    mystr= format_date_time(stamp)
+    return mystr
+
+def gen_pic(arr, filename, datetimeset=None, h5_coords=None, pic_coords=None):
+    "create png file from np array"
+    if _DEBUG:
+        print("Coordinater", h5_coords, pic_coords)
+    arr[arr == 255] = 0     # set 0 in stead of 255
+    datetaken = datetimeset
+    img2 = Image.fromarray(arr)
+    #print("info",img2.info)
+    metadata = exif_bytes = None
+    if datetimeset:
+        metadata = PngInfo()
+        metadata.add_text('Title', 'Radardata from '+ datetaken.strftime("%d/%m-%y %H:%M:%S"))
+        rfc1123_dat =  rfc1123_date(datetaken)
+        metadata.add_text('Creation Time', rfc1123_dat )
+        metadata.add_text('CreationTime', datetaken.strftime("%d/%m-%y %H:%M:%S"))
+        exif_datetime = datetaken.strftime("%Y:%m:%d %H:%M:%S")
+        exif_ifd = {
+            piexif.ExifIFD.DateTimeOriginal: exif_datetime,
+            piexif.ExifIFD.DateTimeDigitized: exif_datetime,
+        }
+        exif_dict = {"Exif": exif_ifd}
+        exif_bytes = piexif.dump(exif_dict)
+    img2.save(filename.with_suffix('.bw.png'), exif=exif_bytes, pnginfo=metadata)
+    #img3 = ImageOps.colorize(img2, "#000", "#F22", mid="#05F", midpoint=100, whitepoint=180)
+    img3 = ImageOps.colorize(img2, "#000", "#00F", whitepoint=180)
+    img4 = img3.convert(mode="RGBA")
+    img4.save(filename.with_suffix('.color.png'), exif=exif_bytes, pnginfo=metadata)
+    img5 = convert_img_transparent(img4)
+    img5.save(filename, exif=exif_bytes, pnginfo=metadata)
+
+#     ne = (52.2942, 18.8932)
+#     nw = (52.2943, 4.3790)
+#     sw = (60.0,3.0)
+#     se = (59.8277, 20.7351)
+    img6 = radar_pic_cut(img5,(60,3), (52.2942, 20.7351), (57.7, 8.01), (54.7, 15.29))
+    img6.save(filename.with_suffix('.cut.png'), exif=exif_bytes, pnginfo=metadata)
+
+def convert_h5_to_png(filename):
+    "Read and convert h5 file to png"
+    #pylint: disable=unsubscriptable-object, invalid-name
+    f5_data = h5py.File(filename)
+    #print(f5_data)
+    dset = f5_data['dataset1']
+    data = dset['data1']
+    data2 = data['data']
+    date1 = f5_data['what'].attrs['date']
+    time = f5_data['what'].attrs['time']
+    #print("date", date1, "time", time)
+    radar_datetime = datetime.strptime(date1.decode('utf-8') + time.decode('utf-8'), "%Y%m%d%H%M%S")
+    if _DEBUG:
+        print("Radar Datetime", radar_datetime)
+    where = where =f5_data['where']
+    attr = where.attrs
+    #print(attr)
+    LL = (attr['LL_lat'][0], attr['LL_lon'][0])
+    LR = (attr['LR_lat'][0], attr['LR_lon'][0])
+    UL = (attr['UL_lat'][0], attr['UL_lon'][0])
+    UR = (attr['UR_lat'][0], attr['UR_lon'][0])
+    #print(LL, LR, UL, UR)
+    #print("ll_lat", where.attrs['LL_lat'])
+
+    #print(type(data2))
+    #print(data2)
+    img = np.array(data2.astype('uint8'))
+    gen_pic(img, filename.with_suffix('.png'), datetimeset=radar_datetime, h5_coords=(LL,LR,UL,UR), pic_coords=((8.01,54.58),(12.73,54.58),(8.01,57.7),(12.73,57.7)))
+
+def get_last_radar_data():
+    "get radar data to temp dir and create img files"
+    Path(RADAR_DIR).mkdir(parents=True, exist_ok=True)
+    today = datetime.now()
+    url = RADAR_URL + '&datetime=../' + parse.quote_plus(rfc3339_date(today))
+    #url = RADAR_URL + '&datetime=../2022-10-24T17:00:00Z'
+    if _DEBUG:
+        print("URL: ", url)
+    response = requests.get(url, timeout=HTTP_TIMEOUT)
+    if response.status_code:
+        data = response.json()
+        radarfile = open(RADAR_DIR / 'response.json','w', encoding='utf8')
+        radarfile.write(response.text)
+        radarfile.close()
+        if 'error' in data:
+            print('Error in request')
+            print(data['error'], data['message'])
+            return False
+        features = data['features']
+        number = 1
+        for feature in features:
+            fileid = feature['id']
+            tempfile = RADAR_DIR / fileid
+            if not tempfile.is_file():
+                downloadurl = feature['asset']['data']['href']
+                downloaddata = requests.get(downloadurl, timeout=HTTP_TIMEOUT)
+                if _DEBUG:
+                    print("Loading:",tempfile)
+                with open(tempfile, 'wb') as fd:
+                    for chunk in downloaddata.iter_content(chunk_size=128):
+                        fd.write(chunk)
+            convert_h5_to_png(tempfile)
+            copy(tempfile.with_suffix('.cut.png'), RADAR_DIR / ('radar'+str(number) + '.png'))
+            number += 1
+        return True
+    else:
+        print("H5 request status", response.status_code)
+        return False
+
+# test procedures
+
+def read_h5_info(filename):
+    "Read and convert h5 file"
+    f5_data = h5py.File(filename)
+    print("Keys",f5_data.keys())
+    print("Attibutes", list(f5_data.attrs))
+    print('Items', f5_data['how'].items(),f5_data['where'].items(),f5_data['what'].items(), f5_data['dataset1'].items())
+    what = f5_data['what']
+    print("What keys", what.keys(), "attr", list(what.attrs))
+    print("date", what.attrs['date'], "time", what.attrs['time'])
+    where =f5_data['where']
+    print("Where keys", where.keys(), "attr", list(where.attrs))
+    print(where.attrs['LL_lat'])
+    dset = f5_data['dataset1']
+    #print ("type",  dset.dtype )
+    #print("dataset1 : shape", dset.shape, "dtype", dset.dtype, "keys", dset.keys())
+    data = dset['data1']
+    print(data.keys())
+    data = data['data']
+    print(data)
+    print("0,0", data[0][0])
+    #img = np.array(data.astype('uint8'))
+    #gen_pic(img, filename.with_suffix('.png'))
+
+def gen_all_png(hfolder):
+    "generate png for all files"
+    for fil in hfolder.glob('*.h5'):
+        print(fil)
+        convert_h5_to_png(fil)
+
+if __name__=='__main__':
+    #get_radar_data()
+    # file = Path(__file__).parent / 'temp/dk.com.202211031550.500_max.h5'
+    # read_h5_info(file)
+    # folder = Path(__file__).parent.parent / 'data' / 'radar'
+    file = folder = Path(__file__).parent.parent / 'data' / 'radar' / 'dk.com.202211101630.500_max.bw.png'
+    myimg = Image.open(file)
+    # myimg.load()
+    # print(myimg.info)
+    x = radar_pic_cut(myimg, (52.29, 4.37), (60, 20.7), (52.29, 4.37), (60, 20.7) )
+    #x =pixel_pos(52.29, 60, 1984, 59.99)
+    print ("val", x)
+    
