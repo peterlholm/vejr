@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-8m-ko^sx*+!n+gx90m-b&ko)#%=1+#02xya6-nawq9es9v535c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost','vejr.net4us.dk']
 
 
 # Application definition
