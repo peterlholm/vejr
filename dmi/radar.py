@@ -13,7 +13,7 @@ from PIL import Image, ImageOps
 from PIL.PngImagePlugin import PngInfo
 import piexif
 from django.conf import settings
-from dmi.utils import convert_img_transparent
+from dmi.utils import convert_img_transparent, posterize
 from .coord import radar_pic_cut
 
 #print(sys.path)
@@ -22,7 +22,7 @@ RADAR_DIR = settings.DATA_DIR / 'radar'
 RADAR_API_KEY="adb8af9d-94a5-4782-9827-c2b2e775dba3"
 HTTP_TIMEOUT = 10
 
-LIMIT = "3"    # number of radar pictures
+LIMIT = "10"    # number of radar pictures
 SCAN_TYPE = "&scanType=fullRange"
 #SCAN_TYPE = ""
 RADAR_URL = "https://dmigw.govcloud.dk/v1/radardata/collections/composite/items?sortorder=datetime,DESC&limit=" + LIMIT + "&api-key=" + RADAR_API_KEY + SCAN_TYPE
@@ -68,13 +68,14 @@ def gen_pic(arr, filename, datetimeset=None, h5_coords=None, pic_coords=None):
         exif_dict = {"Exif": exif_ifd}
         exif_bytes = piexif.dump(exif_dict)
     img2.save(filename.with_suffix('.bw.png'), exif=exif_bytes, pnginfo=metadata)
-    #img3 = ImageOps.colorize(img2, "#000", "#F22", mid="#05F", midpoint=100, whitepoint=180)
-    img3 = ImageOps.colorize(img2, "#000", "#00F", whitepoint=180)
+    img3 = ImageOps.colorize(img2, "#000", "#F22", mid="#05F", midpoint=100, whitepoint=180)
+    #img3 = ImageOps.colorize(img2, "#000", "#00F", whitepoint=180)
     img4 = img3.convert(mode="RGBA")
     img4.save(filename.with_suffix('.color.png'), exif=exif_bytes, pnginfo=metadata)
     img5 = convert_img_transparent(img4)
     img5.save(filename, exif=exif_bytes, pnginfo=metadata)
-
+    #img6 = posterize(img2)
+    #img6.save(filename.with_suffix('.post.png'), exif=exif_bytes, pnginfo=metadata)
 #     ne = (52.2942, 18.8932)
 #     nw = (52.2943, 4.3790)
 #     sw = (60.0,3.0)

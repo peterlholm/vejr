@@ -1,5 +1,5 @@
 "Div img utils"
-from PIL import Image
+from PIL import Image, ImageOps
 import numpy as np
 
 def convert_png_transparent(src_file, dst_file, bg_color=(0,0,0)):
@@ -19,6 +19,10 @@ def convert_img_transparent(img, bg_color=(0,0,0)):
     alpha = np.where(mask, 0, 255)
     array[:,:,-1] = alpha
     return Image.fromarray(np.ubyte(array))
+
+def posterize(img):
+    img2= ImageOps.posterize(img,4)
+    return img2
 
 def get_img_tags(file):
     "return the tags as dict"
