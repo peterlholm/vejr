@@ -1,0 +1,20 @@
+{
+    "short_name": "Vejr",
+    "name": "Peters Vejr",
+    "icons": [{
+            "src": "pic/bad192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "pic/bad512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ],
+    "start_url": "/fremmode/?source=pwa",
+    "background_color": "#FFFFF0",
+    "display": "standalone",
+    "scope": "/fremmode/",
+    "theme_color": "#1e90ff"
+}

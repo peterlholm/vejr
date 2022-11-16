@@ -9,9 +9,9 @@ logging-format-style=new
 #enable=R,
 #        missing-function-docstring
 
-disable=line-too-long
+disable=line-too-long,
+        missing-module-docstring
         #missing-function-docstring,
-        #missing-module-docstring,
         #missing-class-docstring,
 
 generated-members=cv2.* o3d.* cv.*

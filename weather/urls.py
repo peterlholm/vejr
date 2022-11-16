@@ -22,6 +22,7 @@ from dmi.views import index
 
 urlpatterns = [
     path('', index),
+    path('', include('vejr.urls')),
     path('dmi/', include('dmi.urls'))
     #path('admin/', admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
