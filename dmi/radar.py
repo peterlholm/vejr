@@ -22,12 +22,12 @@ RADAR_DIR = settings.DATA_DIR / 'radar'
 RADAR_API_KEY="adb8af9d-94a5-4782-9827-c2b2e775dba3"
 HTTP_TIMEOUT = 10
 
-LIMIT = "5"    # number of radar pictures
+LIMIT = "3"    # number of radar pictures
 SCAN_TYPE = "&scanType=fullRange"
 #SCAN_TYPE = ""
 RADAR_URL = "https://dmigw.govcloud.dk/v1/radardata/collections/composite/items?sortorder=datetime,DESC&limit=" + LIMIT + "&api-key=" + RADAR_API_KEY + SCAN_TYPE
 
-_DEBUG = True
+_DEBUG = False
 
 # class coords():
 
@@ -113,9 +113,17 @@ def convert_h5_to_png(filename):
     img = np.array(data2.astype('uint8'))
     gen_pic(img, filename.with_suffix('.png'), datetimeset=radar_datetime, h5_coords=(LL,LR,UL,UR), pic_coords=((8.01,54.58),(12.73,54.58),(8.01,57.7),(12.73,57.7)))
 
+def clean_radar_files():
+    radar_dir = Path(RADAR_DIR)
+    radar_files = radar_dir.glob('radar*.png')
+    for f in radar_files:
+        f.unlink()
+        #print(str(f))
+
 def get_last_radar_data():
     "get radar data to temp dir and create img files"
     Path(RADAR_DIR).mkdir(parents=True, exist_ok=True)
+    clean_radar_files()
     today = datetime.now()
     url = RADAR_URL + '&datetime=../' + parse.quote_plus(rfc3339_date(today))
     #url = RADAR_URL + '&datetime=../2022-10-24T17:00:00Z'

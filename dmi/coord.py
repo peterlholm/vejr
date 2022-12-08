@@ -19,7 +19,7 @@ def pixel_pos(start_coord, slut_coord, size, coord):
 
 def radar_pic_cut(img, nw, se, new_nw, new_se):
     "Return image cut with new coordinate"
-    print ("imgshape", img.size)
+    #print ("imgshape", img.size)
     pw, ph = img.size
     top = ph - pixel_pos(se[0], nw[0], ph, new_nw[0])
     bund = ph - pixel_pos(se[0], nw[0], ph, new_se[0])
