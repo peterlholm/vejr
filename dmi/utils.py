@@ -38,32 +38,34 @@ def colorize(img):
             pic = img.getpixel((x,y))
             if pic < 20: 
                 nimg.putpixel((x,y), (0,0,0))
-            elif pic < 60:
-                nimg.putpixel((x,y), (125, 238, 226))
             elif pic < 80:
-                nimg.putpixel((x,y), (22, 225,204))
-            elif pic < 100:
-                nimg.putpixel((x,y), (109, 191,242))
+                nimg.putpixel((x,y), (158, 242, 233))   # lys blå
+            elif pic < 103:
+                nimg.putpixel((x,y), (125, 238, 226))   # lid blå
+            elif pic < 105:
+                nimg.putpixel((x,y), (22, 225, 204))    # turkis
+            elif pic < 110:
+                nimg.putpixel((x,y), (109, 191,242))    # grå blå
             elif pic < 120:
-                nimg.putpixel((x,y), (61, 171, 238))
-            elif pic < 125:
-                nimg.putpixel((x,y), (0, 143, 233))
+                nimg.putpixel((x,y), (61, 171, 238))    # mørk blå
+            elif pic < 130:
+                nimg.putpixel((x,y), (0, 143, 233))     # blå
+            elif pic < 135:
+                nimg.putpixel((x,y), (255, 217, 0))     # gul
             elif pic < 140:
-                nimg.putpixel((x,y), (255, 217, 0)) # gul
+                nimg.putpixel((x,y), (255, 178, 0))     # lys orange
+            elif pic < 150:
+                nimg.putpixel((x,y), (255, 142, 82))    # orange
             elif pic < 160:
-                nimg.putpixel((x,y), (255, 178, 0))
-            elif pic < 180:
-                nimg.putpixel((x,y), (255, 142, 82))
+                nimg.putpixel((x,y), (255,181,181))     # pink
+            elif pic < 170:
+                nimg.putpixel((x,y), (255,124,124))     # blegrød
             elif pic < 200:
-                nimg.putpixel((x,y), (255,181,181))
+                nimg.putpixel((x,y), (255, 82, 82))     # rød
+            elif pic < 210:
+                nimg.putpixel((x,y), (230, 57, 57))     # mørk rød
             elif pic < 220:
-                nimg.putpixel((x,y), (255,124,124))
-            elif pic < 230:
-                nimg.putpixel((x,y), (255, 82, 82))
-            elif pic < 240:
-                nimg.putpixel((x,y), (230, 57, 57))
-            elif pic < 250:
-                nimg.putpixel((x,y), (204, 31, 31))
+                nimg.putpixel((x,y), (204, 31, 31))     # mere mørk rød
             else:
-                nimg.putpixel((x,y), (128,0,0))
+                nimg.putpixel((x,y), (128,0,0))         # meget mørk rød
     return nimg

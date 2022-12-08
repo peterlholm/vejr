@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page %}
+<div class="container">
+  <nav class="navbar navbar-expand-lg xnavbar-light navbar-bg">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">
+        <img src="{% static 'pic/badbold_192.png' %}" alt="vejr logo" width="30" height="30">
+        &nbsp;Vejret
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav xme-auto mb-2 mb-lg-0 xnav-tabs xnav-justified">
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" id="menu_start" href="/dmi/radar">Radar Picture</a>
+          </li>
+          <li class=" nav-item">
+              <a class="nav-link" aria-current="page" id="menu_sted" href="/dmi/radardata">Hent Radar Data</a>
+          </li>
+          <li class=" nav-item">
+                <a class="nav-link" aria-current="page" id="menu_persons" href="/dmi/convert">Convert</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" id="menu_plan" href="/dmi/gen_all_png">Gen PNG</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" id="menu_config" href="/dmi/readh5">Read H5</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  {% block content %}
+  {% endblock %}
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+  $("#menu_start").addClass("active");
+</script>
+{% endblock %}

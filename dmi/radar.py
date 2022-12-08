@@ -22,7 +22,7 @@ RADAR_DIR = settings.DATA_DIR / 'radar'
 RADAR_API_KEY="adb8af9d-94a5-4782-9827-c2b2e775dba3"
 HTTP_TIMEOUT = 10
 
-LIMIT = "10"    # number of radar pictures
+LIMIT = "5"    # number of radar pictures
 SCAN_TYPE = "&scanType=fullRange"
 #SCAN_TYPE = ""
 RADAR_URL = "https://dmigw.govcloud.dk/v1/radardata/collections/composite/items?sortorder=datetime,DESC&limit=" + LIMIT + "&api-key=" + RADAR_API_KEY + SCAN_TYPE
