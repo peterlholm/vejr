@@ -18,10 +18,9 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
-from dmi.views import index
+#from dmi.views import index
 
 urlpatterns = [
-    path('', index),
     path('', include('vejr.urls')),
     path('dmi/', include('dmi.urls'))
     #path('admin/', admin.site.urls),

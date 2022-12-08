@@ -1,7 +1,7 @@
-{% extends "base.html" %}
+{% extends "base_menu.html" %}
 {% load static %}
 
-{% block page %}
+{% block content %}
 <style>
     .background {
         width: 1291px;
@@ -22,7 +22,7 @@
     }
 </style>
 
-<h2>{{ title }}</h2>
+<h3>{{ title }}</h3>
 <div>
     <div class="background">
         <div class="radar">
@@ -33,8 +33,6 @@
     <img xsrc="{% static 'pic/dk.png' %}" alt="baggrund dk" height="672" width="1291">
 </div>
 
-{% block content %}
-{% endblock %}
 
 {% endblock %}
 

@@ -3,12 +3,8 @@
 from django.shortcuts import render, redirect
 from django.conf import settings
 from dmi.radar import gen_all_png, get_last_radar_data, convert_h5_to_png, read_h5_info
-from dmi.utils import get_img_tags
+from vejr.utils import get_img_tags
 # Create your views here.
-
-def index(request):
-    "Start side"
-    return render(request, 'index.html')
 
 def radar(request):
     "radar picture"
@@ -42,3 +38,4 @@ def gen_png(request):
     "test function"
     folder = settings.DATA_DIR / 'radar'
     gen_all_png(folder)
+    return redirect('index')
