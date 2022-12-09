@@ -3,10 +3,10 @@ from pathlib import Path
 from PIL import Image
 
 # DMI coords():
-#     ne = (52.2942, 18.8932)
-#     nw = (52.2943, 4.3790)
-#     sw = (60.0,3.0)
-#     se = (59.8277, 20.7351)
+#     sw = (52.2942, 18.8932)
+#     se = (52.2943, 4.3790)
+#     nw = (60.0,3.0)
+#     ne = (59.8277, 20.7351)
 
 # pylint: disable=invalid-name
 

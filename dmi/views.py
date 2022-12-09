@@ -2,7 +2,7 @@
 #from pathlib import Path
 from django.shortcuts import render, redirect
 from django.conf import settings
-from dmi.radar import gen_all_png, get_last_radar_data, convert_h5_to_png, read_h5_info
+from dmi.radar import *
 from vejr.utils import get_img_tags
 # Create your views here.
 
@@ -17,6 +17,12 @@ def radar(request):
 def radar_data(request):
     "radar data test"
     get_last_radar_data()
+    return redirect('radarpicture')
+    #return render(request, 'test.html')
+    
+def create_radar(request):
+    "create radar files"
+    create_radar_pic()
     return redirect('radarpicture')
     #return render(request, 'test.html')
 

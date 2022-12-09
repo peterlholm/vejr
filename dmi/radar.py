@@ -13,7 +13,7 @@ from PIL import Image, ImageOps
 from PIL.PngImagePlugin import PngInfo
 import piexif
 from django.conf import settings
-from vejr.utils import convert_img_transparent, posterize, colorize
+from vejr.utils import convert_img_transparent, colorize
 from .coord import radar_pic_cut
 
 #print(sys.path)
@@ -22,7 +22,7 @@ RADAR_DIR = settings.DATA_DIR / 'radar'
 RADAR_API_KEY="adb8af9d-94a5-4782-9827-c2b2e775dba3"
 HTTP_TIMEOUT = 10
 
-LIMIT = "3"    # number of radar pictures
+LIMIT = "1"    # number of radar pictures
 SCAN_TYPE = "&scanType=fullRange"
 #SCAN_TYPE = ""
 RADAR_URL = "https://dmigw.govcloud.dk/v1/radardata/collections/composite/items?sortorder=datetime,DESC&limit=" + LIMIT + "&api-key=" + RADAR_API_KEY + SCAN_TYPE
@@ -44,6 +44,39 @@ def rfc1123_date(date):
     stamp = mktime(date.timetuple())
     mystr= format_date_time(stamp)
     return mystr
+
+def save_png(arr, filename, datetimeset=None, h5_coords=None, pic_coords=None ):
+    "Save np array as png files"
+    img = Image.fromarray(arr)
+    metadata = exif_bytes = None
+    if datetimeset:
+        metadata = PngInfo()
+        metadata.add_text('Title', 'Radardata from '+ datetimeset.strftime("%d/%m-%y %H:%M:%S"))
+        rfc1123_dat =  rfc1123_date(datetimeset)
+        metadata.add_text('Creation Time', rfc1123_dat )
+        metadata.add_text('CreationTime', datetimeset.strftime("%d/%m-%y %H:%M:%S"))
+        exif_datetime = datetimeset.strftime("%Y:%m:%d %H:%M:%S")
+        exif_ifd = {
+            piexif.ExifIFD.DateTimeOriginal: exif_datetime,
+            piexif.ExifIFD.DateTimeDigitized: exif_datetime,
+        }
+        exif_dict = {"Exif": exif_ifd}
+        exif_bytes = piexif.dump(exif_dict)
+    img.save(filename.with_suffix('.bw.png'), exif=exif_bytes, pnginfo=metadata)
+
+def create_color_file(filename):
+    "Generate color transperant file"
+    img = Image.open(filename)
+    img.load()
+    info = img.info
+    print(info)
+    img2 = colorize(img).convert(mode="RGBA")
+    img3 = convert_img_transparent(img2)
+    #imgout.save(filename.with_suffix('.col.png'), exif=exif_bytes, pnginfo=info)
+    img3.save(filename.with_suffix('.col.png'), pnginfo=info)
+
+
+
 
 def gen_pic(arr, filename, datetimeset=None, h5_coords=None, pic_coords=None):
     "create png file from np array"
@@ -77,15 +110,36 @@ def gen_pic(arr, filename, datetimeset=None, h5_coords=None, pic_coords=None):
     img8.save(filename.with_suffix('.mycol.png'), exif=exif_bytes, pnginfo=metadata)
     img5 = convert_img_transparent(img8)
     img5.save(filename, exif=exif_bytes, pnginfo=metadata)
+
 #     ne = (52.2942, 18.8932)
 #     nw = (52.2943, 4.3790)
 #     sw = (60.0,3.0)
 #     se = (59.8277, 20.7351)
-    img6 = radar_pic_cut(img5,(60,3), (52.2942, 20.7351), (57.7, 8.01), (54.7, 15.29))
+    img6 = radar_pic_cut(img5,(60,3), (52.2942, 20.7351), (56.0, 7.01), (54.7, 15.29))
     img6.save(filename.with_suffix('.cut.png'), exif=exif_bytes, pnginfo=metadata)
 
+def radar_pic(infile, outfile):
+    "Create the radar picture for display"
+    img = Image.open(infile)
+    out = radar_pic_cut(img,(60,3), (52.2942, 20.7351), (56.0, 7.01), (54.7, 15.29))
+    out.save(outfile)
+
+def create_radar_pic():
+    "pass radar folder and make radar.png files"
+    radar_dir = Path(RADAR_DIR)
+    clean_radar_files()
+    radar_files = radar_dir.glob('*max.color.png')
+    file_list = list(radar_files)
+    file_list.sort(reverse=True)
+    i = 1
+    for f in file_list:
+        print(f)
+        radar_pic(f, RADAR_DIR / ('radar'+str(i) + '.png'))
+        img = Image.open(f)
+        i = +1
+
 def convert_h5_to_png(filename):
-    "Read and convert h5 file to png"
+    "Read and convert h5 file to png and add attributes"
     #pylint: disable=unsubscriptable-object, invalid-name
     f5_data = h5py.File(filename)
     #print(f5_data)
@@ -114,6 +168,7 @@ def convert_h5_to_png(filename):
     gen_pic(img, filename.with_suffix('.png'), datetimeset=radar_datetime, h5_coords=(LL,LR,UL,UR), pic_coords=((8.01,54.58),(12.73,54.58),(8.01,57.7),(12.73,57.7)))
 
 def clean_radar_files():
+    "Delete all radar display files"
     radar_dir = Path(RADAR_DIR)
     radar_files = radar_dir.glob('radar*.png')
     for f in radar_files:

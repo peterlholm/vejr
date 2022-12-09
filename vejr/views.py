@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.conf import settings
-
+from vejr.utils import get_img_tags
 
 def index(request):
     "Start side"

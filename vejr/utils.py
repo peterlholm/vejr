@@ -1,5 +1,5 @@
 "Div img utils"
-from PIL import Image, ImageOps
+from PIL import Image
 import numpy as np
 
 def convert_png_transparent(src_file, dst_file, bg_color=(0,0,0)):
@@ -20,10 +20,6 @@ def convert_img_transparent(img, bg_color=(0,0,0)):
     array[:,:,-1] = alpha
     return Image.fromarray(np.ubyte(array))
 
-def posterize(img):
-    img2= ImageOps.posterize(img,4)
-    return img2
-
 def get_img_tags(file):
     "return the tags as dict"
     img=Image.open(file)
@@ -32,11 +28,12 @@ def get_img_tags(file):
     return info
 
 def colorize(img):
+    "make colors ala DMI"
     nimg = Image.new('RGB',img.size)
     for x in range(img.size[0]):
         for y in range(img.size[1]):
             pic = img.getpixel((x,y))
-            if pic < 20: 
+            if pic < 20:
                 nimg.putpixel((x,y), (0,0,0))
             elif pic < 80:
                 nimg.putpixel((x,y), (158, 242, 233))   # lys blå
